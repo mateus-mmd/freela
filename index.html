@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="libs/jspdf.umd.min.js"></script>
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="branding">Designer CRM</div>
+        <nav>
+            <ul class="nav">
+                <li><a href="#" data-page="dashboard">Dashboard</a></li>
+                <li><a href="#" data-page="clients">Clients</a></li>
+                <li><a href="#" data-page="leads">Leads</a></li>
+                <li><a href="#" data-page="invoices">Invoices</a></li>
+                <li><a href="#" data-page="contracts">Contracts</a></li>
+            </ul>
+        </nav>
+        <button id="modeToggle" class="mode-toggle">🌙</button>
+    </header>
+
+    <main>
+        <section id="dashboard" class="page active">
+            <h1>Dashboard</h1>
+            <div class="stats">
+                <div class="card" id="clientsCount">Clients: 0</div>
+                <div class="card" id="leadsCount">Leads: 0</div>
+                <div class="card" id="invoicesCount">Invoices Pending: 0</div>
+            </div>
+        </section>
+
+        <section id="clients" class="page">
+            <h1>Clients</h1>
+            <button id="addClientBtn" class="btn">Add New Client</button>
+            <input type="search" id="clientSearch" placeholder="Search clients" class="search">
+            <div id="clientList" class="card-container"></div>
+        </section>
+
+        <section id="leads" class="page">
+            <h1>Leads</h1>
+            <button id="addLeadBtn" class="btn">Add New Lead</button>
+            <input type="search" id="leadSearch" placeholder="Search leads" class="search">
+            <div id="leadList" class="card-container"></div>
+        </section>
+
+        <section id="invoices" class="page">
+            <h1>Invoices</h1>
+            <button id="createInvoice" class="btn">Generate Invoice</button>
+            <div id="invoiceList" class="card-container"></div>
+        </section>
+
+        <section id="contracts" class="page">
+            <h1>Contracts</h1>
+            <button id="createContract" class="btn">Generate Contract</button>
+            <div id="contractList" class="card-container"></div>
+        </section>
+    </main>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <div id="snackbar"></div>
+</body>
+</html>
