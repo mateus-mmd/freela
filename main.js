@@ -1,157 +1,177 @@
-(function(){
-    const state = {
-        clients: JSON.parse(localStorage.getItem('clients') || '[]'),
-        leads: JSON.parse(localStorage.getItem('leads') || '[]')
-    };
+const pages = document.querySelectorAll('.page');
+const navLinks = document.querySelectorAll('.nav-link');
+const modeToggle = document.getElementById('modeToggle');
+const snackbar = document.getElementById('snackbar');
 
-    const pages = document.querySelectorAll('.page');
-    document.querySelectorAll('.nav a').forEach(a => {
-        a.addEventListener('click', e => {
-            e.preventDefault();
-            const page = a.getAttribute('data-page');
-            pages.forEach(p => p.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
-            updateStats();
-        });
-    });
+function showPage(id) {
+  pages.forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-    const modeToggle = document.getElementById('modeToggle');
-    modeToggle.addEventListener('click', () => {
-        document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
-        modeToggle.textContent = document.body.dataset.theme === 'dark' ? '☀️' : '🌙';
-    });
+navLinks.forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.target)));
 
-    function showModal(content){
-        const modal = document.getElementById('modal');
-        document.getElementById('modalBody').innerHTML = '';
-        document.getElementById('modalBody').appendChild(content);
-        modal.classList.remove('hidden');
-    }
-    document.getElementById('closeModal').addEventListener('click', ()=>{
-        document.getElementById('modal').classList.add('hidden');
-    });
+modeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+});
 
-    function snackbar(msg){
-        const sb = document.getElementById('snackbar');
-        sb.textContent = msg;
-        sb.className = 'show';
-        setTimeout(()=>sb.className='',3000);
-    }
+function toast(msg) {
+  snackbar.textContent = msg;
+  snackbar.classList.add('show');
+  setTimeout(() => snackbar.classList.remove('show'), 3000);
+}
 
-    function save(){
-        localStorage.setItem('clients', JSON.stringify(state.clients));
-        localStorage.setItem('leads', JSON.stringify(state.leads));
-        updateStats();
-    }
+// LocalStorage helpers
+function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+function load(key) { return JSON.parse(localStorage.getItem(key) || '[]'); }
 
-    function updateStats(){
-        document.getElementById('clientsCount').textContent = 'Clients: '+state.clients.length;
-        document.getElementById('leadsCount').textContent = 'Leads: '+state.leads.length;
-        document.getElementById('invoicesCount').textContent = 'Invoices Pending: '+state.clients.length;
-        renderLists();
-    }
+// Clients
+let clients = load('clients');
+const clientList = document.getElementById('clientList');
+const clientModal = document.getElementById('clientModal');
+const clientForm = document.getElementById('clientForm');
+const clientSearch = document.getElementById('clientSearch');
 
-    function renderLists(){
-        const clientList = document.getElementById('clientList');
-        clientList.innerHTML = '';
-        const search = document.getElementById('clientSearch').value.toLowerCase();
-        state.clients.filter(c=>c.name.toLowerCase().includes(search)).forEach((client,idx)=>{
-            const div = document.createElement('div');
-            div.className='card';
-            div.innerHTML=`<strong>${client.name}</strong><br>${client.email}<br>${client.service}<br><button data-edit="${idx}">Edit</button> <button data-del="${idx}">Delete</button>`;
-            clientList.appendChild(div);
-        });
-        const leadList = document.getElementById('leadList');
-        leadList.innerHTML='';
-        const lsearch=document.getElementById('leadSearch').value.toLowerCase();
-        state.leads.filter(l=>l.name.toLowerCase().includes(lsearch)).forEach((lead,idx)=>{
-            const div=document.createElement('div');
-            div.className='card';
-            div.innerHTML=`<strong>${lead.name}</strong><br>${lead.status}<br>${lead.notes}<br><button data-ledit="${idx}">Edit</button> <button data-ldel="${idx}">Delete</button>`;
-            leadList.appendChild(div);
-        });
-    }
+function renderClients() {
+  clientList.innerHTML = '';
+  const term = clientSearch.value.toLowerCase();
+  clients.filter(c => c.name.toLowerCase().includes(term)).forEach((client, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<strong>${client.name}</strong><br>${client.email}<br>${client.service}
+      <div><button onclick="editClient(${index})"><i class='fas fa-edit'></i></button>
+      <button onclick="deleteClient(${index})"><i class='fas fa-trash'></i></button></div>`;
+    clientList.appendChild(card);
+  });
+  document.getElementById('statClients').textContent = `Clients: ${clients.length}`;
+}
 
-    document.getElementById('clientList').addEventListener('click', e=>{
-        if(e.target.dataset.del){
-            state.clients.splice(e.target.dataset.del,1);
-            save();
-            snackbar('Client deleted');
-        }else if(e.target.dataset.edit){
-            const idx=e.target.dataset.edit;
-            openClientForm(state.clients[idx], idx);
-        }
-    });
+function openClientModal(client, index) {
+  clientModal.classList.remove('hidden');
+  clientForm.reset();
+  document.getElementById('clientId').value = index;
+  if (client) {
+    document.getElementById('clientName').value = client.name;
+    document.getElementById('clientEmail').value = client.email;
+    document.getElementById('clientService').value = client.service;
+  }
+}
 
-    document.getElementById('leadList').addEventListener('click', e=>{
-        if(e.target.dataset.ldel){
-            state.leads.splice(e.target.dataset.ldel,1);
-            save();
-            snackbar('Lead deleted');
-        }else if(e.target.dataset.ledit){
-            const idx=e.target.dataset.ledit;
-            openLeadForm(state.leads[idx], idx);
-        }
-    });
+document.getElementById('newClientBtn').addEventListener('click', () => openClientModal());
+document.getElementById('closeClientModal').addEventListener('click', () => clientModal.classList.add('hidden'));
+clientSearch.addEventListener('input', renderClients);
 
-    document.getElementById('clientSearch').addEventListener('input', renderLists);
-    document.getElementById('leadSearch').addEventListener('input', renderLists);
+clientForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('clientId').value;
+  const client = {
+    name: document.getElementById('clientName').value,
+    email: document.getElementById('clientEmail').value,
+    service: document.getElementById('clientService').value
+  };
+  if (id) clients[id] = client; else clients.push(client);
+  save('clients', clients);
+  clientModal.classList.add('hidden');
+  renderClients();
+  toast('Client saved');
+});
 
-    document.getElementById('addClientBtn').addEventListener('click', ()=>openClientForm());
-    document.getElementById('addLeadBtn').addEventListener('click', ()=>openLeadForm());
+function editClient(i) { openClientModal(clients[i], i); }
+function deleteClient(i) { clients.splice(i,1); save('clients', clients); renderClients(); toast('Client deleted'); }
 
-    function openClientForm(data={}, idx){
-        const form=document.createElement('form');
-        form.innerHTML=`<h3>${idx!=null?'Edit':'Add'} Client</h3>
-            <label>Name<input required name="name" value="${data.name||''}"></label>
-            <label>Email<input type="email" required name="email" value="${data.email||''}"></label>
-            <label>Service<input name="service" value="${data.service||''}"></label>
-            <button class="btn" type="submit">Save</button>`;
-        form.addEventListener('submit', e=>{
-            e.preventDefault();
-            const formData=new FormData(form);
-            const obj=Object.fromEntries(formData.entries());
-            if(idx!=null){state.clients[idx]=obj;}else{state.clients.push(obj);} 
-            save();
-            document.getElementById('modal').classList.add('hidden');
-            snackbar('Client saved');
-        });
-        showModal(form);
-    }
+// Leads
+let leads = load('leads');
+const leadList = document.getElementById('leadList');
+const leadModal = document.getElementById('leadModal');
+const leadForm = document.getElementById('leadForm');
+const leadSearch = document.getElementById('leadSearch');
 
-    function openLeadForm(data={}, idx){
-        const form=document.createElement('form');
-        form.innerHTML=`<h3>${idx!=null?'Edit':'Add'} Lead</h3>
-            <label>Name<input required name="name" value="${data.name||''}"></label>
-            <label>Status<input name="status" value="${data.status||''}"></label>
-            <label>Notes<textarea name="notes">${data.notes||''}</textarea></label>
-            <button class="btn" type="submit">Save</button>`;
-        form.addEventListener('submit', e=>{
-            e.preventDefault();
-            const formData=new FormData(form);
-            const obj=Object.fromEntries(formData.entries());
-            if(idx!=null){state.leads[idx]=obj;}else{state.leads.push(obj);} 
-            save();
-            document.getElementById('modal').classList.add('hidden');
-            snackbar('Lead saved');
-        });
-        showModal(form);
-    }
+function renderLeads() {
+  leadList.innerHTML = '';
+  const term = leadSearch.value.toLowerCase();
+  leads.filter(l => l.name.toLowerCase().includes(term)).forEach((lead, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<strong>${lead.name}</strong><br>${lead.email}<br>Status: ${lead.status}
+      <div><button onclick="editLead(${index})"><i class='fas fa-edit'></i></button>
+      <button onclick="deleteLead(${index})"><i class='fas fa-trash'></i></button></div>`;
+    leadList.appendChild(card);
+  });
+  document.getElementById('statLeads').textContent = `Leads: ${leads.length}`;
+}
 
-    document.getElementById('createInvoice').addEventListener('click', ()=>{
-        const doc = new jspdf.jsPDF();
-        doc.text('Invoice Example',10,10);
-        doc.save('invoice.pdf');
-    });
+function openLeadModal(lead, index) {
+  leadModal.classList.remove('hidden');
+  leadForm.reset();
+  document.getElementById('leadId').value = index;
+  if (lead) {
+    document.getElementById('leadName').value = lead.name;
+    document.getElementById('leadEmail').value = lead.email;
+    document.getElementById('leadStatus').value = lead.status;
+    document.getElementById('leadNotes').value = lead.notes;
+  }
+}
 
-    document.getElementById('createContract').addEventListener('click', ()=>{
-        const doc = new jspdf.jsPDF();
-        doc.text('Contract Example',10,10);
-        doc.save('contract.pdf');
-    });
+document.getElementById('newLeadBtn').addEventListener('click', () => openLeadModal());
+document.getElementById('closeLeadModal').addEventListener('click', () => leadModal.classList.add('hidden'));
+leadSearch.addEventListener('input', renderLeads);
 
-    // init
-    state.clients = state.clients.length?state.clients:[{name:'Acme Co',email:'client@example.com',service:'Logo Design'}];
-    state.leads = state.leads.length?state.leads:[{name:'New Lead',status:'Follow up',notes:'Found on social media'}];
-    save();
-})();
+leadForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const id = document.getElementById('leadId').value;
+  const lead = {
+    name: document.getElementById('leadName').value,
+    email: document.getElementById('leadEmail').value,
+    status: document.getElementById('leadStatus').value,
+    notes: document.getElementById('leadNotes').value
+  };
+  if (id) leads[id] = lead; else leads.push(lead);
+  save('leads', leads);
+  leadModal.classList.add('hidden');
+  renderLeads();
+  toast('Lead saved');
+});
+
+function editLead(i) { openLeadModal(leads[i], i); }
+function deleteLead(i) { leads.splice(i,1); save('leads', leads); renderLeads(); toast('Lead deleted'); }
+
+// Invoices
+const invoiceArea = document.getElementById('invoiceArea');
+document.getElementById('generateInvoice').addEventListener('click', () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text('Sample Invoice', 10, 10);
+  doc.save('invoice.pdf');
+});
+
+// Contracts
+const contractForm = document.getElementById('contractForm');
+const contractPreview = document.getElementById('contractPreview');
+contractForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('contractClient').value;
+  const desc = document.getElementById('contractDesc').value;
+  const rate = document.getElementById('contractRate').value;
+  const text = `Contract\nClient: ${name}\nProject: ${desc}\nRate: ${rate}`;
+  contractPreview.textContent = text;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text(text, 10, 10);
+  doc.save('contract.pdf');
+});
+
+// Initial render with dummy data if none
+if (!clients.length) {
+  clients = [
+    { name: 'Acme Co', email: 'contact@acme.com', service: 'Logo design' },
+    { name: 'Globex', email: 'hello@globex.com', service: 'Brand identity' }
+  ];
+  save('clients', clients);
+}
+if (!leads.length) {
+  leads = [
+    { name: 'Jane Doe', email: 'jane@example.com', status: 'New', notes: '' }
+  ];
+  save('leads', leads);
+}
+renderClients();
+renderLeads();
