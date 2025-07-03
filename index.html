@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Freelancer CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-+6vdpTh8PU9tU9xHCkDi0PuYttn6mJtDH7RWuZbfoK81YuwMVAgR/AxywDmsFkb3uKxwq+DvNk9QONF9CQiRIA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">Freelancer CRM</div>
+    <button id="modeToggle" class="mode-toggle"><i class="fas fa-moon"></i></button>
+    <nav class="nav">
+      <button class="nav-link" data-target="dashboard">Dashboard</button>
+      <button class="nav-link" data-target="clients">Clients</button>
+      <button class="nav-link" data-target="leads">Leads</button>
+      <button class="nav-link" data-target="invoices">Invoices</button>
+      <button class="nav-link" data-target="contracts">Contracts</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="dashboard" class="page active">
+      <h1>Dashboard</h1>
+      <div class="stats">
+        <div class="card" id="statClients">Clients: 0</div>
+        <div class="card" id="statLeads">Leads: 0</div>
+        <div class="card" id="statInvoices">Pending Invoices: 0</div>
+      </div>
+    </section>
+
+    <section id="clients" class="page">
+      <h1>Clients</h1>
+      <input type="text" id="clientSearch" placeholder="Search clients..." class="input">
+      <div id="clientList" class="list"></div>
+      <button id="newClientBtn" class="primary-btn">Add New Client</button>
+
+      <div id="clientModal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close" id="closeClientModal">&times;</span>
+          <h2>Add Client</h2>
+          <form id="clientForm">
+            <input type="hidden" id="clientId">
+            <label>Name<input id="clientName" required></label>
+            <label>Email<input id="clientEmail" type="email" required></label>
+            <label>Service<input id="clientService" required></label>
+            <button type="submit" class="primary-btn">Save</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="leads" class="page">
+      <h1>Leads</h1>
+      <input type="text" id="leadSearch" placeholder="Search leads..." class="input">
+      <div id="leadList" class="list"></div>
+      <button id="newLeadBtn" class="primary-btn">Add New Lead</button>
+
+      <div id="leadModal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close" id="closeLeadModal">&times;</span>
+          <h2>Add Lead</h2>
+          <form id="leadForm">
+            <input type="hidden" id="leadId">
+            <label>Name<input id="leadName" required></label>
+            <label>Email<input id="leadEmail" type="email" required></label>
+            <label>Status
+              <select id="leadStatus">
+                <option>New</option>
+                <option>Follow-up</option>
+                <option>Closed</option>
+              </select>
+            </label>
+            <label>Notes<textarea id="leadNotes"></textarea></label>
+            <button type="submit" class="primary-btn">Save</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section id="invoices" class="page">
+      <h1>Invoices</h1>
+      <button id="generateInvoice" class="primary-btn">Generate Invoice PDF</button>
+      <div id="invoiceArea"></div>
+    </section>
+
+    <section id="contracts" class="page">
+      <h1>Contracts</h1>
+      <form id="contractForm">
+        <label>Client Name<input id="contractClient" required></label>
+        <label>Project Description<textarea id="contractDesc" required></textarea></label>
+        <label>Rate<input id="contractRate" required></label>
+        <button type="submit" class="primary-btn">Preview &amp; Download</button>
+      </form>
+      <div id="contractPreview" class="card"></div>
+    </section>
+  </main>
+
+  <div id="snackbar"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-YA+z+9UfnFDwYfaYP38N6YxmLy9AZB1kVgrpa/OdhrZRyTveuwBn8UK+uM+MiXw211PGb0ptGR4DKzQnjkNABQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+
