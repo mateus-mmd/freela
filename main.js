@@ -2,13 +2,20 @@ const pages = document.querySelectorAll('.page');
 const navLinks = document.querySelectorAll('.nav-link');
 const modeToggle = document.getElementById('modeToggle');
 const snackbar = document.getElementById('snackbar');
+const loginContainer = document.getElementById('login');
+const loginForm = document.getElementById('loginForm');
+const app = document.getElementById('app');
 
 function showPage(id) {
   pages.forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-navLinks.forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.target)));
+navLinks.forEach(btn => {
+  if (btn.dataset.target) {
+    btn.addEventListener('click', () => showPage(btn.dataset.target));
+  }
+});
 
 modeToggle.addEventListener('click', () => {
   document.body.classList.toggle('dark');
@@ -19,6 +26,36 @@ function toast(msg) {
   snackbar.classList.add('show');
   setTimeout(() => snackbar.classList.remove('show'), 3000);
 }
+
+// Simple auth
+function checkAuth() {
+  if (localStorage.getItem('loggedIn') === 'true') {
+    loginContainer.classList.add('hidden');
+    app.classList.remove('hidden');
+  } else {
+    loginContainer.classList.remove('hidden');
+    app.classList.add('hidden');
+  }
+}
+
+loginForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  if (u === 'admin' && p === 'password') {
+    localStorage.setItem('loggedIn', 'true');
+    checkAuth();
+  } else {
+    toast('Invalid credentials');
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('loggedIn');
+  checkAuth();
+});
+
+checkAuth();
 
 // LocalStorage helpers
 function save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
@@ -143,6 +180,42 @@ document.getElementById('generateInvoice').addEventListener('click', () => {
   doc.save('invoice.pdf');
 });
 
+// Documents
+let docs = load('documents');
+const docFile = document.getElementById('docFile');
+const documentList = document.getElementById('documentList');
+
+function renderDocuments() {
+  documentList.innerHTML = '';
+  docs.forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<a href="${d.data}" download="${d.name}">${d.name}</a> <button onclick="deleteDocument(${i})"><i class='fas fa-trash'></i></button>`;
+    documentList.appendChild(card);
+  });
+}
+
+document.getElementById('uploadDoc').addEventListener('click', () => {
+  const file = docFile.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    docs.push({ name: file.name, data: e.target.result });
+    save('documents', docs);
+    renderDocuments();
+    docFile.value = '';
+    toast('Document uploaded');
+  };
+  reader.readAsDataURL(file);
+});
+
+function deleteDocument(i) {
+  docs.splice(i,1);
+  save('documents', docs);
+  renderDocuments();
+  toast('Document deleted');
+}
+
 // Contracts
 const contractForm = document.getElementById('contractForm');
 const contractPreview = document.getElementById('contractPreview');
@@ -175,3 +248,4 @@ if (!leads.length) {
 }
 renderClients();
 renderLeads();
+renderDocuments();

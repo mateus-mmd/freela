@@ -11,19 +11,31 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="header">
-    <div class="logo">Freelancer CRM</div>
-    <button id="modeToggle" class="mode-toggle"><i class="fas fa-moon"></i></button>
-    <nav class="nav">
-      <button class="nav-link" data-target="dashboard">Dashboard</button>
-      <button class="nav-link" data-target="clients">Clients</button>
-      <button class="nav-link" data-target="leads">Leads</button>
-      <button class="nav-link" data-target="invoices">Invoices</button>
-      <button class="nav-link" data-target="contracts">Contracts</button>
-    </nav>
-  </header>
+  <div id="login" class="login-container hidden">
+    <form id="loginForm" class="card">
+      <h2>Login</h2>
+      <input id="username" class="input" placeholder="Username" required>
+      <input id="password" class="input" type="password" placeholder="Password" required>
+      <button type="submit" class="primary-btn">Login</button>
+    </form>
+  </div>
 
-  <main>
+  <div id="app" class="hidden">
+    <header class="header">
+      <div class="logo">Freelancer CRM</div>
+      <button id="modeToggle" class="mode-toggle"><i class="fas fa-moon"></i></button>
+      <nav class="nav">
+        <button class="nav-link" data-target="dashboard">Dashboard</button>
+        <button class="nav-link" data-target="clients">Clients</button>
+        <button class="nav-link" data-target="leads">Leads</button>
+        <button class="nav-link" data-target="invoices">Invoices</button>
+        <button class="nav-link" data-target="contracts">Contracts</button>
+        <button class="nav-link" data-target="documents">Documents</button>
+        <button id="logoutBtn" class="nav-link">Logout</button>
+      </nav>
+    </header>
+
+    <main>
     <section id="dashboard" class="page active">
       <h1>Dashboard</h1>
       <div class="stats">
@@ -88,6 +100,13 @@
       <div id="invoiceArea"></div>
     </section>
 
+    <section id="documents" class="page">
+      <h1>Documents</h1>
+      <input type="file" id="docFile">
+      <button id="uploadDoc" class="primary-btn">Upload</button>
+      <div id="documentList" class="list"></div>
+    </section>
+
     <section id="contracts" class="page">
       <h1>Contracts</h1>
       <form id="contractForm">
@@ -104,6 +123,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-YA+z+9UfnFDwYfaYP38N6YxmLy9AZB1kVgrpa/OdhrZRyTveuwBn8UK+uM+MiXw211PGb0ptGR4DKzQnjkNABQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="main.js"></script>
+  </div>
 </body>
 </html>
 
